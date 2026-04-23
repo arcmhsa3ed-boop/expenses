@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اليومية المحسّنة — تسجيل شامل</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0a0e1a; --card:#131929; --card2:#1a2236;
+    --border:rgba(99,179,237,0.12);
+    --accent:#38bdf8; --accent2:#818cf8;
+    --gold:#f59e0b; --green:#34d399; --red:#f87171; --orange:#fb923c;
+    --text:#e2e8f0; --muted:#64748b;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);font-family:'Cairo',sans-serif;color:var(--text);min-height:100vh;direction:rtl;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(56,189,248,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+
+  .container{max-width:1600px;margin:0 auto;padding:20px;position:relative;z-index:1;}
+
+  header{margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border);}
+  h1{font-size:24px;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .subtitle{font-size:12px;color:var(--muted);font-family:'Tajawal';margin-top:4px;}
+
+  /* Tabs */
+  .tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+  .tab-btn{background:rgba(56,189,248,0.08);border:1px solid var(--border);color:var(--accent);padding:10px 16px;border-radius:8px;cursor:pointer;font-family:'Cairo';font-size:13px;transition:all .2s;}
+  .tab-btn.active{background:var(--accent);color:var(--bg);}
+  .tab-btn:hover{background:rgba(56,189,248,0.15);}
+
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+
+  /* Forms */
+  .form-section{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px;}
+  .form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+  @media(max-width:1200px){.form-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:600px){.form-grid{grid-template-columns:1fr;}}
+
+  label{font-size:11px;color:var(--muted);font-family:'Tajawal';display:block;margin-bottom:4px;}
+  input, select{background:var(--card2);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;font-family:'Cairo';font-size:13px;width:100%;}
+  input:focus, select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 10px rgba(56,189,248,0.2);}
+
+  .btn-row{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+  .btn{padding:10px 20px;border-radius:8px;cursor:pointer;font-family:'Cairo';font-size:13px;border:none;transition:all .2s;}
+  .btn-primary{background:var(--accent);color:var(--bg);font-weight:600;}
+  .btn-primary:hover{background:rgba(56,189,248,0.8);}
+  .btn-secondary{background:rgba(56,189,248,0.08);border:1px solid var(--border);color:var(--accent);}
+  .btn-secondary:hover{background:rgba(56,189,248,0.15);}
+
+  /* Tables */
+  .table-wrapper{overflow-x:auto;margin-bottom:20px;}
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--border);border-radius:12px;font-size:12px;}
+  th{background:var(--card2);padding:12px;text-align:right;font-weight:700;color:var(--accent);border-bottom:1px solid var(--border);}
+  td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.04);}
+  tr:hover{background:rgba(56,189,248,0.05);}
+  tr:last-child td{border-bottom:none;}
+
+  .cell-text{font-size:11px;}
+  .cell-num{text-align:left;font-family:monospace;font-weight:600;}
+  .pos{color:var(--green);}
+  .neg{color:var(--red);}
+
+  /* Analytics */
+  .analytics-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
+  @media(max-width:1200px){.analytics-grid{grid-template-columns:repeat(3,1fr);}}
+  @media(max-width:600px){.analytics-grid{grid-template-columns:repeat(2,1fr);}}
+
+  .metric-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;}
+  .metric-label{font-size:10px;color:var(--muted);font-family:'Tajawal';text-transform:uppercase;margin-bottom:6px;}
+  .metric-value{font-size:20px;font-weight:900;}
+  .metric-card.blue .metric-value{color:var(--accent);}
+  .metric-card.green .metric-value{color:var(--green);}
+  .metric-card.red .metric-value{color:var(--red);}
+  .metric-card.gold .metric-value{color:var(--gold);}
+  .metric-card.orange .metric-value{color:var(--orange);}
+  .metric-sub{font-size:9px;color:var(--muted);margin-top:4px;}
+
+  /* Summary */
+  .summary-section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px;}
+  .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .summary-item{padding:12px;background:var(--card2);border-radius:8px;}
+  .summary-label{font-size:11px;color:var(--muted);font-family:'Tajawal';margin-bottom:4px;}
+  .summary-value{font-size:16px;font-weight:700;}
+
+  /* Colors for categories */
+  .cat-personal{color:#ff6b9d;}
+  .cat-work{color:var(--accent);}
+  .cat-transfer{color:var(--muted);}
+
+  .action-btn{background:none;border:none;color:var(--accent);cursor:pointer;font-size:12px;padding:4px 8px;border-radius:4px;transition:all .2s;}
+  .action-btn:hover{background:rgba(56,189,248,0.1);}
+
+  @keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .table-wrapper{animation:slideIn .3s ease;}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>📔 اليومية المحسّنة</h1>
+    <p class="subtitle">تسجيل شامل للمعاملات المالية: شخصي + عمل + تحليل مفصّل</p>
+  </header>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('input')">➕ إضافة معاملة</button>
+    <button class="tab-btn" onclick="switchTab('daily')">📊 اليومية الكاملة</button>
+    <button class="tab-btn" onclick="switchTab('personal')">👤 المصروفات الشخصية</button>
+    <button class="tab-btn" onclick="switchTab('analytics')">📈 التحليل</button>
+    <button class="tab-btn" onclick="switchTab('summary')">📋 الملخص</button>
+  </div>
+
+  <!-- Tab 1: Input Form -->
+  <div id="input" class="tab-content active">
+    <div class="form-section">
+      <h3 style="margin-bottom:16px;font-size:16px;">تسجيل معاملة جديدة</h3>
+      <div class="form-grid">
+        <div>
+          <label>التاريخ</label>
+          <input type="date" id="date" value="">
+        </div>
+        <div>
+          <label>النوع</label>
+          <select id="type" onchange="updateForm()">
+            <option value="">اختر النوع</option>
+            <option value="عمل-إيراد">🏗️ عمل - إيراد</option>
+            <option value="عمل-مصروف">🏗️ عمل - مصروف</option>
+            <option value="شخصي-مصروف">👤 شخصي - مصروف</option>
+            <option value="تحويل">🔄 تحويل داخلي</option>
+          </select>
+        </div>
+        <div>
+          <label>الوصف</label>
+          <input type="text" id="desc" placeholder="مثال: دفع عمالة، أكل، تحويل">
+        </div>
+        <div>
+          <label>المبلغ</label>
+          <input type="number" id="amount" placeholder="0" step="0.01">
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div id="mrc-field" style="display:none;">
+          <label>مركز التكلفة</label>
+          <select id="mrc">
+            <option>شقة الزهراء</option>
+            <option>شقة العاصمة</option>
+            <option>عمارة هليوبليس</option>
+            <option>شقة الهضبة</option>
+            <option>ورشة النجارة</option>
+            <option>شقة التجمع ايران</option>
+            <option>أخرى</option>
+          </select>
+        </div>
+        <div id="cat-field" style="display:none;">
+          <label>فئة المصروف</label>
+          <select id="cat">
+            <option>الطعام والشراب</option>
+            <option>المنزل</option>
+            <option>بنزين</option>
+            <option>ملابس</option>
+            <option>صحة</option>
+            <option>نقل وتوصيل</option>
+            <option>ترفيه</option>
+            <option>تعليم</option>
+            <option>أخرى</option>
+          </select>
+        </div>
+        <div id="src-field" style="display:none;">
+          <label>المصدر/الحساب</label>
+          <select id="src">
+            <option>الأهلي اكسترا</option>
+            <option>الأهلي توفير</option>
+            <option>بنك مصر</option>
+            <option>ايجي بنك</option>
+            <option>تنمية الصادرات</option>
+            <option>فودافون كاش</option>
+            <option>كاش</option>
+            <option>عهدة</option>
+          </select>
+        </div>
+        <div id="dest-field" style="display:none;">
+          <label>الحساب المستقبل (تحويل)</label>
+          <select id="dest">
+            <option>الأهلي اكسترا</option>
+            <option>الأهلي توفير</option>
+            <option>بنك مصر</option>
+            <option>ايجي بنك</option>
+            <option>تنمية الصادرات</option>
+            <option>فودافون كاش</option>
+            <option>كاش</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div>
+          <label>ملاحظات</label>
+          <input type="text" id="notes" placeholder="ملاحظات إضافية">
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="clearForm()">🗑️ إلغاء</button>
+        <button class="btn btn-primary" onclick="addTransaction()">✅ حفظ المعاملة</button>
+      </div>
+    </div>
+
+    <div id="msg" style="display:none;padding:12px;border-radius:8px;margin-bottom:16px;font-size:13px;"></div>
+  </div>
+
+  <!-- Tab 2: Daily Journal -->
+  <div id="daily" class="tab-content">
+    <div class="form-section">
+      <h3 style="margin-bottom:12px;font-size:14px;">🔍 فلتر</h3>
+      <div class="form-grid">
+        <div>
+          <label>من التاريخ</label>
+          <input type="date" id="f-from">
+        </div>
+        <div>
+          <label>إلى التاريخ</label>
+          <input type="date" id="f-to">
+        </div>
+        <div>
+          <label>النوع</label>
+          <select id="f-type">
+            <option value="">الكل</option>
+            <option value="عمل-إيراد">🏗️ عمل - إيراد</option>
+            <option value="عمل-مصروف">🏗️ عمل - مصروف</option>
+            <option value="شخصي-مصروف">👤 شخصي - مصروف</option>
+            <option value="تحويل">🔄 تحويل</option>
+          </select>
+        </div>
+        <div>
+          <label></label>
+          <button class="btn btn-primary" style="margin-top:6px;" onclick="filterDaily()">🔍 بحث</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>التاريخ</th>
+            <th>النوع</th>
+            <th>الوصف</th>
+            <th>الإيراد</th>
+            <th>المصروف</th>
+            <th>مركز التكلفة</th>
+            <th>الفئة</th>
+            <th>الحساب</th>
+            <th>الملاحظات</th>
+            <th>الإجراء</th>
+          </tr>
+        </thead>
+        <tbody id="daily-table">
+          <tr><td colspan="11" style="text-align:center;color:var(--muted);">لا توجد معاملات — أضف واحدة من تاب "إضافة"</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tab 3: Personal Expenses -->
+  <div id="personal" class="tab-content">
+    <div class="analytics-grid">
+      <div class="metric-card green">
+        <div class="metric-label">إجمالي المصروفات الشخصية</div>
+        <div class="metric-value" id="p-total">0</div>
+        <div class="metric-sub">جنيه مصري</div>
+      </div>
+      <div class="metric-card red">
+        <div class="metric-label">الطعام والشراب</div>
+        <div class="metric-value" id="p-food">0</div>
+      </div>
+      <div class="metric-card orange">
+        <div class="metric-label">المنزل والفواتير</div>
+        <div class="metric-value" id="p-home">0</div>
+      </div>
+      <div class="metric-card gold">
+        <div class="metric-label">بنزين والمواصلات</div>
+        <div class="metric-value" id="p-gas">0</div>
+      </div>
+      <div class="metric-card blue">
+        <div class="metric-label">أخرى</div>
+        <div class="metric-value" id="p-other">0</div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3 style="margin-bottom:12px;font-size:14px;">📊 تفاصيل المصروفات الشخصية</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>التاريخ</th>
+              <th>الوصف</th>
+              <th>الفئة</th>
+              <th>المبلغ</th>
+              <th>الحساب</th>
+              <th>الملاحظات</th>
+            </tr>
+          </thead>
+          <tbody id="personal-table">
+            <tr><td colspan="6" style="text-align:center;color:var(--muted);">لم تسجل مصروفات شخصية بعد</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3 style="margin-bottom:12px;font-size:14px;">🎯 توزيع المصروفات الشخصية (%)</h3>
+      <canvas id="personal-chart" style="max-height:300px;"></canvas>
+    </div>
+  </div>
+
+  <!-- Tab 4: Analytics -->
+  <div id="analytics" class="tab-content">
+    <div class="analytics-grid">
+      <div class="metric-card blue">
+        <div class="metric-label">إجمالي الإيرادات</div>
+        <div class="metric-value pos" id="a-rev">0</div>
+      </div>
+      <div class="metric-card red">
+        <div class="metric-label">إجمالي المصروفات</div>
+        <div class="metric-value neg" id="a-exp">0</div>
+      </div>
+      <div class="metric-card green">
+        <div class="metric-label">صافي العمل</div>
+        <div class="metric-value" id="a-net">0</div>
+      </div>
+      <div class="metric-card gold">
+        <div class="metric-label">مصروفات شخصية</div>
+        <div class="metric-value neg" id="a-personal">0</div>
+      </div>
+      <div class="metric-card orange">
+        <div class="metric-label">الصافي الفعلي</div>
+        <div class="metric-value" id="a-final">0</div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3 style="margin-bottom:12px;font-size:14px;">📊 المخطط الزمني للرصيد</h3>
+      <canvas id="balance-chart" style="max-height:350px;"></canvas>
+    </div>
+
+    <div class="form-section">
+      <h3 style="margin-bottom:12px;font-size:14px;">🏗️ توزيع المصروفات بالمشاريع</h3>
+      <canvas id="project-chart" style="max-height:300px;"></canvas>
+    </div>
+  </div>
+
+  <!-- Tab 5: Summary -->
+  <div id="summary" class="tab-content">
+    <div class="summary-section">
+      <h3 style="margin-bottom:16px;font-size:14px;">📋 ملخص المعاملات</h3>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="summary-label">عدد المعاملات</div>
+          <div class="summary-value" id="s-count">0</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">عدد الإيرادات</div>
+          <div class="summary-value pos" id="s-revcount">0</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">عدد المصروفات (العمل)</div>
+          <div class="summary-value neg" id="s-expcount">0</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">عدد المصروفات (شخصي)</div>
+          <div class="summary-value neg" id="s-percount">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3 style="margin-bottom:16px;font-size:14px;">💰 الملخص المالي</h3>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="summary-label">إجمالي الإيرادات (عمل)</div>
+          <div class="summary-value pos" id="s-rev">0</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">إجمالي مصروفات العمل</div>
+          <div class="summary-value neg" id="s-exp">0</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">صافي العمل</div>
+          <div class="summary-value" id="s-net">0</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">إجمالي المصروفات الشخصية</div>
+          <div class="summary-value neg" id="s-per">0</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">🎯 الصافي الفعلي (دخلك الحقيقي)</div>
+          <div class="summary-value" id="s-final" style="font-size:24px;">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3 style="margin-bottom:16px;font-size:14px;">📥 تصدير البيانات</h3>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="exportCSV()">📥 تصدير كـ CSV</button>
+        <button class="btn btn-primary" onclick="exportJSON()">📥 تصدير كـ JSON</button>
+        <button class="btn btn-secondary" onclick="printSummary()">🖨️ طباعة الملخص</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Set today's date
+document.getElementById('date').valueAsDate = new Date();
+
+let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+
+function updateForm() {
+  const type = document.getElementById('type').value;
+  document.getElementById('mrc-field').style.display = (type.includes('عمل-') ? 'block' : 'none');
+  document.getElementById('cat-field').style.display = (type === 'شخصي-مصروف' ? 'block' : 'none');
+  document.getElementById('src-field').style.display = (type !== 'تحويل' ? 'block' : 'none');
+  document.getElementById('dest-field').style.display = (type === 'تحويل' ? 'block' : 'none');
+}
+
+function addTransaction() {
+  const date = document.getElementById('date').value;
+  const type = document.getElementById('type').value;
+  const desc = document.getElementById('desc').value;
+  const amount = parseFloat(document.getElementById('amount').value);
+  const mrc = document.getElementById('mrc').value;
+  const cat = document.getElementById('cat').value;
+  const src = document.getElementById('src').value;
+  const dest = document.getElementById('dest').value;
+  const notes = document.getElementById('notes').value;
+
+  if (!date || !type || !desc || !amount) {
+    showMsg('❌ يرجى ملء جميع الحقول المطلوبة', 'error');
+    return;
+  }
+
+  const t = {
+    id: Date.now(),
+    date, type, desc, amount,
+    mrc: (type.includes('عمل-') ? mrc : null),
+    cat: (type === 'شخصي-مصروف' ? cat : null),
+    src: (type !== 'تحويل' ? src : null),
+    dest: (type === 'تحويل' ? dest : null),
+    notes
+  };
+
+  transactions.push(t);
+  localStorage.setItem('transactions', JSON.stringify(transactions));
+  showMsg('✅ تم حفظ المعاملة بنجاح', 'success');
+  clearForm();
+  updateAll();
+}
+
+function clearForm() {
+  document.getElementById('date').valueAsDate = new Date();
+  document.getElementById('type').value = '';
+  document.getElementById('desc').value = '';
+  document.getElementById('amount').value = '';
+  document.getElementById('notes').value = '';
+  document.getElementById('msg').style.display = 'none';
+  updateForm();
+}
+
+function showMsg(text, type) {
+  const msg = document.getElementById('msg');
+  msg.textContent = text;
+  msg.style.background = (type === 'success' ? 'rgba(52,211,153,0.1)' : 'rgba(248,113,113,0.1)');
+  msg.style.color = (type === 'success' ? '#34d399' : '#f87171');
+  msg.style.border = `1px solid ${(type === 'success' ? '#34d399' : '#f87171')}`;
+  msg.style.display = 'block';
+  setTimeout(() => msg.style.display = 'none', 4000);
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(tab).classList.add('active');
+  event.target.classList.add('active');
+  setTimeout(updateAll, 100);
+}
+
+function updateAll() {
+  updateDaily();
+  updatePersonal();
+  updateAnalytics();
+  updateSummary();
+}
+
+function updateDaily() {
+  const tbody = document.getElementById('daily-table');
+  const filtered = transactions.sort((a,b) => new Date(b.date) - new Date(a.date));
+  
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--muted);">لا توجد معاملات</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map((t, i) => {
+    const rev = (t.type.includes('إيراد') ? t.amount : 0);
+    const exp = (t.type.includes('مصروف') ? t.amount : 0);
+    const typeColor = t.type.includes('شخصي') ? 'cat-personal' : (t.type.includes('تحويل') ? 'cat-transfer' : 'cat-work');
+    return `
+      <tr>
+        <td>${filtered.length - i}</td>
+        <td>${t.date}</td>
+        <td><span class="${typeColor}">${t.type}</span></td>
+        <td>${t.desc}</td>
+        <td class="cell-num pos">${rev ? rev.toLocaleString('ar-EG') : '—'}</td>
+        <td class="cell-num neg">${exp ? exp.toLocaleString('ar-EG') : '—'}</td>
+        <td>${t.mrc || '—'}</td>
+        <td>${t.cat || '—'}</td>
+        <td>${t.src || (t.dest ? t.dest : '—')}</td>
+        <td style="font-size:10px;">${t.notes || '—'}</td>
+        <td><button class="action-btn" onclick="deleteTransaction(${t.id})">❌</button></td>
+      </tr>`;
+  }).join('');
+}
+
+function updatePersonal() {
+  const personal = transactions.filter(t => t.type === 'شخصي-مصروف');
+  const total = personal.reduce((s,t) => s+t.amount, 0);
+
+  const categories = {
+    'الطعام والشراب': 0,
+    'المنزل': 0,
+    'بنزين': 0,
+    'ملابس': 0,
+    'صحة': 0,
+    'نقل وتوصيل': 0,
+    'ترفيه': 0,
+    'تعليم': 0,
+    'أخرى': 0
+  };
+
+  personal.forEach(t => {
+    if (categories.hasOwnProperty(t.cat)) categories[t.cat] += t.amount;
+  });
+
+  document.getElementById('p-total').textContent = Math.round(total).toLocaleString('ar-EG');
+  document.getElementById('p-food').textContent = Math.round(categories['الطعام والشراب']).toLocaleString('ar-EG');
+  document.getElementById('p-home').textContent = Math.round(categories['المنزل']).toLocaleString('ar-EG');
+  document.getElementById('p-gas').textContent = Math.round(categories['بنزين'] + categories['نقل وتوصيل']).toLocaleString('ar-EG');
+  document.getElementById('p-other').textContent = Math.round(Object.values(categories).reduce((s,v) => s+v, 0) - (categories['الطعام والشراب'] + categories['المنزل'] + categories['بنزين'] + categories['نقل وتوصيل'])).toLocaleString('ar-EG');
+
+  const tbody = document.getElementById('personal-table');
+  if (!personal.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);">لم تسجل مصروفات شخصية بعد</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = personal.map(t => `
+    <tr>
+      <td>${t.date}</td>
+      <td>${t.desc}</td>
+      <td>${t.cat}</td>
+      <td class="cell-num neg">${t.amount.toLocaleString('ar-EG')}</td>
+      <td>${t.src || '—'}</td>
+      <td>${t.notes || '—'}</td>
+    </tr>`).join('');
+}
+
+function updateAnalytics() {
+  const rev = transactions.filter(t => t.type.includes('إيراد')).reduce((s,t) => s+t.amount, 0);
+  const exp = transactions.filter(t => t.type === 'عمل-مصروف').reduce((s,t) => s+t.amount, 0);
+  const per = transactions.filter(t => t.type === 'شخصي-مصروف').reduce((s,t) => s+t.amount, 0);
+  const net = rev - exp;
+  const final = net - per;
+
+  document.getElementById('a-rev').textContent = Math.round(rev).toLocaleString('ar-EG');
+  document.getElementById('a-exp').textContent = Math.round(exp).toLocaleString('ar-EG');
+  document.getElementById('a-net').textContent = Math.round(net).toLocaleString('ar-EG');
+  document.getElementById('a-personal').textContent = Math.round(per).toLocaleString('ar-EG');
+  document.getElementById('a-final').textContent = Math.round(final).toLocaleString('ar-EG');
+  document.getElementById('a-final').style.color = (final >= 0 ? '#34d399' : '#f87171');
+}
+
+function updateSummary() {
+  const rev = transactions.filter(t => t.type.includes('إيراد')).reduce((s,t) => s+t.amount, 0);
+  const exp = transactions.filter(t => t.type === 'عمل-مصروف').reduce((s,t) => s+t.amount, 0);
+  const per = transactions.filter(t => t.type === 'شخصي-مصروف').reduce((s,t) => s+t.amount, 0);
+  const net = rev - exp;
+  const final = net - per;
+
+  document.getElementById('s-count').textContent = transactions.length;
+  document.getElementById('s-revcount').textContent = transactions.filter(t => t.type.includes('إيراد')).length;
+  document.getElementById('s-expcount').textContent = transactions.filter(t => t.type === 'عمل-مصروف').length;
+  document.getElementById('s-percount').textContent = transactions.filter(t => t.type === 'شخصي-مصروف').length;
+
+  document.getElementById('s-rev').textContent = Math.round(rev).toLocaleString('ar-EG');
+  document.getElementById('s-exp').textContent = Math.round(exp).toLocaleString('ar-EG');
+  document.getElementById('s-net').textContent = Math.round(net).toLocaleString('ar-EG');
+  document.getElementById('s-per').textContent = Math.round(per).toLocaleString('ar-EG');
+  document.getElementById('s-final').textContent = Math.round(final).toLocaleString('ar-EG');
+  document.getElementById('s-final').style.color = (final >= 0 ? '#34d399' : '#f87171');
+}
+
+function deleteTransaction(id) {
+  if (confirm('هل تريد حذف هذه المعاملة؟')) {
+    transactions = transactions.filter(t => t.id !== id);
+    localStorage.setItem('transactions', JSON.stringify(transactions));
+    updateAll();
+  }
+}
+
+function filterDaily() {
+  // TODO: Implement filtering
+  updateDaily();
+}
+
+function exportCSV() {
+  let csv = 'التاريخ,النوع,الوصف,الإيراد,المصروف,مركز التكلفة,الفئة,الحساب\n';
+  transactions.forEach(t => {
+    const rev = (t.type.includes('إيراد') ? t.amount : '');
+    const exp = (t.type.includes('مصروف') ? t.amount : '');
+    csv += `${t.date},${t.type},${t.desc},${rev},${exp},${t.mrc||''},${t.cat||''},${t.src||''}\n`;
+  });
+  const el = document.createElement('a');
+  el.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv));
+  el.setAttribute('download', 'transactions.csv');
+  el.click();
+}
+
+function exportJSON() {
+  const json = JSON.stringify(transactions, null, 2);
+  const el = document.createElement('a');
+  el.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(json));
+  el.setAttribute('download', 'transactions.json');
+  el.click();
+}
+
+function printSummary() {
+  window.print();
+}
+
+updateAll();
+</script>
+</body>
+</html>
